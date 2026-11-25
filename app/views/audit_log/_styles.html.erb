@@ -1,0 +1,149 @@
+<style>
+  /* Audit log. Inherits the theme's font and colours; only the event markers carry their own colour. */
+  .al {
+    --al-line: color-mix(in srgb, currentColor 14%, transparent);
+    --al-soft: color-mix(in srgb, currentColor 5%, transparent);
+    --al-muted: color-mix(in srgb, currentColor 58%, transparent);
+    --al-ok: #2f9e44;
+    --al-fail: #e8590c;
+    --al-change: #1c7ed6;
+    --al-access: #7048e8;
+    --al-alert: #e03131;
+    max-inline-size: 72rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .al a { text-decoration: none; }
+  .al a:hover { text-decoration: underline; }
+  .al :focus-visible { outline: 2px solid var(--al-change); outline-offset: 2px; border-radius: 3px; }
+
+  /* Header */
+  .al-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px 24px; margin-block-end: 6px; }
+  .al-head h2 { margin: 0; padding: 0; border: 0; }
+  .al-status { margin: 4px 0 0; color: var(--al-muted); font-size: 0.875em; line-height: 1.5; }
+  .al-status .al-seal-ok { color: var(--al-ok); }
+  .al-status .al-seal-bad { color: var(--al-alert); font-weight: 600; }
+  .al-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .al-actions form { display: inline; margin: 0; }
+  .al-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--al-line);
+    border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: 0.875em; cursor: pointer; line-height: 1.3;
+  }
+  .al-btn:hover { background: var(--al-soft); text-decoration: none; }
+  .al-btn-quiet { border-color: transparent; color: var(--al-muted); }
+
+  /* Alert banner: the one loud element */
+  .al-banner {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin: 16px 0 0; padding: 12px 16px;
+    border-inline-start: 4px solid var(--al-alert); border-radius: 0 6px 6px 0;
+    background: color-mix(in srgb, var(--al-alert) 9%, transparent);
+  }
+  .al-banner strong { color: var(--al-alert); }
+  .al-banner span { color: var(--al-muted); font-size: 0.875em; }
+
+  /* Summary = type filter */
+  .al-tabs { display: flex; flex-wrap: wrap; gap: 0; margin: 20px 0 0; border-block-end: 1px solid var(--al-line); }
+  .al-tab {
+    display: flex; flex-direction: column; gap: 2px; padding: 8px 18px 10px; margin-block-end: -1px;
+    border-block-end: 2px solid transparent; color: var(--al-muted); font-size: 0.875em;
+  }
+  .al-tab b { font-size: 1.45em; font-weight: 600; color: var(--al-text, currentColor); line-height: 1.15; }
+  .al .al-tab:hover { text-decoration: none; color: inherit; }
+  .al-tab[aria-current="true"] { border-block-end-color: currentColor; color: inherit; }
+  .al-tab-alert b { color: var(--al-alert); }
+
+  /* Search row */
+  .al-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 14px 0 6px; }
+  .al-filters input[type="search"], .al-filters input[type="date"] {
+    padding: 5px 8px; border: 1px solid var(--al-line); border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: 0.875em;
+  }
+  .al-filters input[type="search"] { inline-size: min(22rem, 100%); }
+  .al-filters label { display: inline-flex; align-items: center; gap: 6px; font-size: 0.875em; color: var(--al-muted); margin: 0; }
+  .al-filters .al-clear { font-size: 0.875em; }
+
+  /* Day groups */
+  .al-day { margin: 22px 0 0; }
+  .al-day h3 {
+    margin: 0 0 2px; padding: 0 0 6px; border: 0; border-block-end: 1px solid var(--al-line);
+    font-size: 0.95em; font-weight: 600; background: none;
+  }
+  .al-day h3 small { margin-inline-start: 8px; font-weight: normal; color: var(--al-muted); }
+
+  /* Event rows */
+  .al-list { list-style: none; margin: 0; padding: 0; }
+  .al-row {
+    position: relative; display: grid; grid-template-columns: 5.2rem 1fr minmax(9rem, auto); gap: 2px 16px;
+    padding: 9px 10px 9px 14px; border-block-end: 1px solid var(--al-line);
+  }
+  .al-row::before {
+    content: ""; position: absolute; inset-block: 11px; inset-inline-start: 0; inline-size: 3px; border-radius: 2px;
+    background: var(--al-mark, var(--al-line));
+  }
+  .al-row.is-ok { --al-mark: var(--al-ok); }
+  .al-row.is-fail { --al-mark: var(--al-fail); }
+  .al-row.is-change { --al-mark: var(--al-change); }
+  .al-row.is-access { --al-mark: var(--al-access); }
+  .al-row.is-quiet { --al-mark: var(--al-line); }
+  .al-row.is-alert { --al-mark: var(--al-alert); background: color-mix(in srgb, var(--al-alert) 7%, transparent); }
+  .al-row.is-alert::before { inset-block: 0; inline-size: 4px; border-radius: 0; }
+
+  .al-time { color: var(--al-muted); font-size: 0.875em; padding-block-start: 1px; }
+  .al-what { min-inline-size: 0; line-height: 1.45; }
+  .al-who { font-weight: 600; }
+  .al-tag {
+    display: inline-block; margin-inline-start: 6px; padding: 0 6px; border-radius: 4px; font-size: 0.75em; font-weight: 600;
+    vertical-align: 1px; color: #fff; background: var(--al-alert);
+  }
+  .al-note { color: var(--al-muted); }
+  .al-meta { text-align: end; font-size: 0.8em; color: var(--al-muted); line-height: 1.5; }
+  .al-meta a { color: inherit; }
+
+  /* Before -> after */
+  .al-diff { margin: 6px 0 0; padding: 0; list-style: none; font-size: 0.875em; }
+  .al-diff li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; padding: 2px 0; }
+  .al-diff .al-attr { color: var(--al-muted); min-inline-size: 9rem; }
+  .al-diff del, .al-diff ins { padding: 0 4px; border-radius: 3px; text-decoration: none; overflow-wrap: anywhere; }
+  .al-diff del { background: color-mix(in srgb, var(--al-alert) 12%, transparent); }
+  .al-diff ins { background: color-mix(in srgb, var(--al-ok) 14%, transparent); }
+  .al-diff .al-arrow { color: var(--al-muted); }
+  .al-diff .al-obj { font-weight: 600; }
+
+  /* Technical details */
+  .al-more { margin: 6px 0 0; font-size: 0.8em; }
+  .al-more summary { cursor: pointer; color: var(--al-muted); inline-size: fit-content; }
+  .al-more dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 8px 0 2px; padding: 10px 12px; border-radius: 6px; background: var(--al-soft); }
+  .al-more dt { color: var(--al-muted); }
+  .al-more dd { margin: 0; overflow-wrap: anywhere; }
+  .al-more code, .al-more pre { font-size: 1em; white-space: pre-wrap; word-break: break-word; margin: 0; background: none; border: 0; padding: 0; }
+
+  .al-empty { margin: 32px 0; padding: 28px; text-align: center; border: 1px dashed var(--al-line); border-radius: 8px; color: var(--al-muted); }
+  .al-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin: 14px 0 0; font-size: 0.875em; color: var(--al-muted); }
+  .al-foot .pagination { margin: 0; }
+
+  /* Unlock */
+  .al-unlock { max-inline-size: 26rem; margin: 6vh auto 0; }
+  .al-unlock h2 { margin: 0 0 6px; padding: 0; border: 0; }
+  .al-unlock p.al-lead { margin: 0 0 20px; color: var(--al-muted); line-height: 1.5; }
+  .al-unlock .al-field { display: grid; gap: 6px; margin: 0 0 14px; }
+  .al-unlock .al-field label { font-weight: 600; font-size: 0.9em; }
+  .al-unlock .al-field small { color: var(--al-muted); font-weight: normal; }
+  .al-unlock input[type="password"] {
+    inline-size: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid var(--al-line); border-radius: 6px;
+    background: transparent; color: inherit; font: inherit;
+  }
+  .al-unlock .al-submit { inline-size: 100%; justify-content: center; padding: 9px 12px; margin-block-start: 4px;
+    background: var(--al-change); border-color: var(--al-change); color: #fff; font-weight: 600; }
+  .al-unlock .al-submit:hover { background: color-mix(in srgb, var(--al-change) 88%, #000); }
+  .al-unlock .al-problem { margin: 0 0 16px; padding: 10px 12px; border-inline-start: 4px solid var(--al-alert); border-radius: 0 6px 6px 0;
+    background: color-mix(in srgb, var(--al-alert) 9%, transparent); font-size: 0.9em; line-height: 1.45; }
+
+  @media (max-width: 720px) {
+    .al-row { grid-template-columns: 1fr; padding-inline-start: 14px; }
+    .al-time { order: -1; }
+    .al-meta { text-align: start; }
+    .al-tab { padding-inline: 12px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .al-more[open] dl { animation: al-open 140ms ease-out; }
+    @keyframes al-open { from { opacity: 0; transform: translateY(-3px); } }
+  }
+</style>

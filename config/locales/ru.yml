@@ -1,50 +1,208 @@
 ru:
-  audit_log_title: "Журнал аудита"
-  audit_log_unlock_info: "Введите свой пароль Redmine и пароль журнала. Журнал откроется на %{minutes} мин. Каждое открытие записывается."
-  audit_log_own_password: "Ваш пароль (%{login})"
-  audit_log_journal_password: "Пароль журнала"
-  audit_log_open: "Открыть журнал"
-  audit_log_error_wrong_passwords: "Неверный пароль. Попытка записана в журнал."
-  audit_log_error_locked_out: "Слишком много неверных попыток. Попробуйте через %{minutes} мин."
-  audit_log_error_password_not_set: "Пароль журнала в %{path} не задан или повреждён (например, остался пример REPLACE). Сгенерируйте хеш заново: bin/audit_log_password."
-  audit_log_verify: "Проверить целостность"
-  audit_log_lock: "Закрыть журнал"
-  audit_log_chain_ok: "Цепочка записей цела: проверено %{count}."
-  audit_log_chain_broken: "Цепочка нарушена у %{count} записей (изменены или удалены соседние): %{ids}."
-  audit_log_warning_world_readable: "Файл %{path} доступен на чтение всем пользователям сервера. Выполните: chown root:www-data и chmod 640."
-  audit_log_alerts_week: "Тревог за 7 дней: %{count}"
-  audit_log_from: "С"
-  audit_log_to: "по"
-  audit_log_category: "Тип"
-  audit_log_search: "Текст"
-  audit_log_only_alerts: "только тревоги"
-  audit_log_time: "Время"
-  audit_log_event: "Событие"
-  audit_log_what: "Что"
-  audit_log_alert: "ТРЕВОГА"
-  audit_log_details: "параметры"
-  audit_log_footer: "Записи хранятся %{days} дн. Доступ: %{auditors}. Журнал закрывается через %{minutes} мин. Настройки — в config/audit_log.yml на сервере."
-
-  audit_log_category_auth: "Вход"
-  audit_log_category_change: "Изменение"
-  audit_log_category_access: "Журнал"
-
-  audit_log_event_login_success: "успешный вход"
-  audit_log_event_login_failure: "неудачный вход"
-  audit_log_event_login_twofa_pending: "пароль верный, ждём код 2FA"
-  audit_log_event_login_twofa_failure: "неверный код 2FA"
-  audit_log_event_logout: "выход"
-  audit_log_event_session_end: "конец сессии"
-  audit_log_event_request: "запрос"
-  audit_log_event_unlock: "открыт"
-  audit_log_event_unlock_failed: "неудачная попытка открыть"
-  audit_log_event_unlock_refused: "открытие заблокировано"
-  audit_log_event_view: "просмотр"
-  audit_log_event_export: "выгрузка CSV"
-  audit_log_event_verify: "проверка целостности"
-  audit_log_event_lock: "закрыт"
-  audit_log_event_denied: "попытка открыть без доступа"
-
-  audit_log_change_create: "создано"
-  audit_log_change_update: "изменено"
-  audit_log_change_destroy: "удалено"
+  audit_log_title: Журнал аудита
+  audit_log_unlock_info: Введите свой пароль и пароль журнала. Журнал откроется на %{minutes} мин., каждое открытие записывается.
+  audit_log_own_password_label: Ваш пароль
+  audit_log_journal_password: Пароль журнала
+  audit_log_open: Открыть журнал
+  audit_log_error_wrong_passwords: Пароль не подошёл. Попытка записана в журнал.
+  audit_log_attempts_left:
+    zero: Попыток больше нет, подождите 15 минут.
+    one: Осталась %{count} попытка за 15 минут.
+    few: Осталось %{count} попытки за 15 минут.
+    many: Осталось %{count} попыток за 15 минут.
+    other: Осталось %{count} попытки за 15 минут.
+  audit_log_error_locked_out: Слишком много неверных попыток. Открыть журнал можно будет через %{minutes} мин.
+  audit_log_error_password_not_set: 'Пароль журнала в %{path} не задан или повреждён (например, остался пример REPLACE). Задайте его заново: bin/audit_log_password.'
+  audit_log_status: 'Записи хранятся %{days} дн. Открыть могут: %{auditors}. Журнал закроется в %{time}.'
+  audit_log_never_verified: Целостность ещё не проверялась.
+  audit_log_chain_ok_short: Цепочка цела
+  audit_log_chain_bad_short: Цепочка нарушена
+  audit_log_last_verify: последняя проверка %{time}.
+  audit_log_verify: Проверить целостность
+  audit_log_export: Выгрузить CSV
+  audit_log_lock: Закрыть журнал
+  audit_log_chain_ok: 'Цепочка записей цела: проверено %{count}.'
+  audit_log_chain_broken: 'Цепочка нарушена у %{count} записей (изменены или удалены соседние): %{ids}.'
+  audit_log_warning_world_readable: Файл %{path} доступен на чтение всем пользователям сервера. Выполните chown root:www-data и chmod 640.
+  audit_log_alerts_week:
+    one: '%{count} тревога за 7 дней.'
+    few: '%{count} тревоги за 7 дней.'
+    many: '%{count} тревог за 7 дней.'
+    other: '%{count} тревоги за 7 дней.'
+  audit_log_last_alert: 'Последняя %{time}:'
+  audit_log_show_alerts: Показать тревоги
+  audit_log_category: Тип событий
+  audit_log_tab_all: Все события
+  audit_log_tab_auth: Входы
+  audit_log_tab_failed: Неудачные входы
+  audit_log_tab_change: Изменения
+  audit_log_tab_access: Журнал
+  audit_log_tab_alerts: Тревоги
+  audit_log_search_placeholder: Логин, IP или текст
+  audit_log_from: с
+  audit_log_to: по
+  audit_log_show: Показать
+  audit_log_reset: Сбросить
+  audit_log_filter_by: Показать только %{value}
+  audit_log_empty_none: Событий пока нет. Они появятся после первого входа или изменения в Redmine.
+  audit_log_empty_filtered: Под эти условия событий нет. Измените даты, текст поиска или выберите другую вкладку.
+  audit_log_events:
+    one: '%{count} событие'
+    few: '%{count} события'
+    many: '%{count} событий'
+    other: '%{count} события'
+  audit_log_yesterday: вчера
+  audit_log_shown: Показано %{from}–%{to} из %{total}
+  audit_log_alert: тревога
+  audit_log_details: Подробности
+  audit_log_request: Запрос
+  audit_log_handler: Обработчик
+  audit_log_params: Параметры
+  audit_log_browser: Браузер
+  audit_log_record: Запись
+  audit_log_anonymous: Аноним
+  audit_log_did_login: вошёл
+  audit_log_with_2fa: с кодом 2FA
+  audit_log_did_login_failure: 'не смог войти: %{reason}'
+  audit_log_unknown_login: (такого логина нет)
+  audit_log_reason_invalid: неверный логин или пароль
+  audit_log_reason_locked: учётная запись заблокирована
+  audit_log_reason_pending: учётная запись не активирована
+  audit_log_reason_ldap_registration: для учётной записи LDAP нужна регистрация
+  audit_log_did_twofa_pending: ввёл верный пароль, ждём код 2FA
+  audit_log_did_twofa_failure: ввёл неверный код 2FA
+  audit_log_did_logout: вышел
+  audit_log_did_session_end: сессия завершилась
+  audit_log_did_unlock: открыл журнал
+  audit_log_did_unlock_failed: 'не смог открыть журнал: %{reason}'
+  audit_log_reason_journal_password: неверный пароль журнала
+  audit_log_reason_own_password: неверный свой пароль
+  audit_log_reason_both_passwords: неверны оба пароля
+  audit_log_did_unlock_refused: 'не смог открыть журнал: слишком много попыток'
+  audit_log_did_view: просмотрел журнал
+  audit_log_did_export: выгрузил журнал в CSV
+  audit_log_filter_note: '(фильтр: %{filter})'
+  audit_log_did_verify_ok: 'проверил целостность: нарушений нет, проверено %{count}'
+  audit_log_did_verify_broken: 'проверил целостность: нарушена у %{count} записей'
+  audit_log_did_lock: закрыл журнал
+  audit_log_did_denied: пытался открыть журнал без доступа
+  audit_log_via_api: (через API)
+  audit_log_failed_status: (не выполнено, ответ %{status})
+  audit_log_value_changed: изменён
+  audit_log_value_empty: пусто
+  audit_log_became: стало
+  audit_log_attr_twofa: Ключ 2FA
+  audit_log_local_login: локальный
+  audit_log_change_create: 'создано:'
+  audit_log_change_update: 'изменено:'
+  audit_log_change_destroy: 'удалено:'
+  audit_log_do_generic_create: создал
+  audit_log_do_generic_update: изменил
+  audit_log_do_generic_destroy: удалил
+  audit_log_do_settings: изменил настройки
+  audit_log_do_plugin_settings: изменил настройки плагина
+  audit_log_do_user_create: создал пользователя
+  audit_log_do_user_update: изменил пользователя
+  audit_log_do_user_destroy: удалил пользователя
+  audit_log_do_users_destroy: удалил пользователей
+  audit_log_do_users_lock: заблокировал пользователей
+  audit_log_do_users_unlock: разблокировал пользователей
+  audit_log_do_group_create: создал группу
+  audit_log_do_group_update: изменил группу
+  audit_log_do_group_destroy: удалил группу
+  audit_log_do_group_add_users: добавил пользователей в группу
+  audit_log_do_group_remove_user: убрал пользователя из группы
+  audit_log_do_role_create: создал роль
+  audit_log_do_role_update: изменил роль
+  audit_log_do_role_destroy: удалил роль
+  audit_log_do_role_permissions: изменил права ролей
+  audit_log_do_tracker_create: создал трекер
+  audit_log_do_tracker_update: изменил трекер
+  audit_log_do_tracker_destroy: удалил трекер
+  audit_log_do_status_create: создал статус задач
+  audit_log_do_status_update: изменил статус задач
+  audit_log_do_status_destroy: удалил статус задач
+  audit_log_do_workflow: изменил последовательность статусов
+  audit_log_do_workflow_fields: изменил права на поля
+  audit_log_do_workflow_copy: скопировал последовательность статусов
+  audit_log_do_field_create: создал настраиваемое поле
+  audit_log_do_field_update: изменил настраиваемое поле
+  audit_log_do_field_destroy: удалил настраиваемое поле
+  audit_log_do_ldap_create: добавил источник LDAP
+  audit_log_do_ldap_update: изменил источник LDAP
+  audit_log_do_ldap_destroy: удалил источник LDAP
+  audit_log_do_project_create: создал проект
+  audit_log_do_project_update: изменил проект
+  audit_log_do_project_destroy: удалил проект
+  audit_log_do_project_archive: архивировал проект
+  audit_log_do_project_unarchive: вернул проект из архива
+  audit_log_do_project_close: закрыл проект
+  audit_log_do_project_reopen: открыл проект
+  audit_log_do_member_create: добавил участников проекта
+  audit_log_do_member_update: изменил роли участника
+  audit_log_do_member_destroy: убрал участника проекта
+  audit_log_do_version_create: создал версию
+  audit_log_do_version_update: изменил версию
+  audit_log_do_version_destroy: удалил версию
+  audit_log_do_category_create: создал категорию задач
+  audit_log_do_category_update: изменил категорию задач
+  audit_log_do_category_destroy: удалил категорию задач
+  audit_log_do_enum_create: создал значение списка
+  audit_log_do_enum_update: изменил значение списка
+  audit_log_do_enum_destroy: удалил значение списка
+  audit_log_do_repo_create: добавил репозиторий
+  audit_log_do_repo_update: изменил репозиторий
+  audit_log_do_repo_destroy: удалил репозиторий
+  audit_log_do_query_create: сохранил запрос
+  audit_log_do_query_update: изменил запрос
+  audit_log_do_query_destroy: удалил запрос
+  audit_log_do_issue_destroy: удалил задачу
+  audit_log_do_file_destroy: удалил файл
+  audit_log_do_wiki_destroy: удалил вики-страницу
+  audit_log_do_time_destroy: удалил трудозатраты
+  audit_log_do_news_destroy: удалил новость
+  audit_log_do_message_destroy: удалил сообщение
+  audit_log_do_document_destroy: удалил документ
+  audit_log_do_journal_update: изменил комментарий
+  audit_log_do_lost_password: запросил сброс пароля
+  audit_log_do_register: зарегистрировался
+  audit_log_do_activate: активировал учётную запись
+  audit_log_do_my_account: изменил свою учётную запись
+  audit_log_do_my_password: сменил свой пароль
+  audit_log_do_my_api_key: сбросил свой ключ API
+  audit_log_do_my_atom_key: сбросил свой ключ Atom
+  audit_log_do_twofa_on: включил 2FA
+  audit_log_do_twofa_off: отключил 2FA
+  audit_log_do_email_create: добавил адрес почты
+  audit_log_do_email_destroy: удалил адрес почты
+  audit_log_do_email_update: изменил адрес почты
+  audit_log_model_user: пользователь
+  audit_log_model_group: группа
+  audit_log_model_setting: настройка
+  audit_log_model_role: роль
+  audit_log_model_member: участник
+  audit_log_model_member_role: роль участника
+  audit_log_model_tracker: трекер
+  audit_log_model_issue_status: статус
+  audit_log_model_custom_field: поле
+  audit_log_model_auth_source: LDAP
+  audit_log_model_auth_source_ldap: LDAP
+  audit_log_model_project: проект
+  audit_log_model_enabled_module: модуль
+  audit_log_model_version: версия
+  audit_log_model_issue_category: категория
+  audit_log_model_enumeration: значение списка
+  audit_log_model_email_address: адрес почты
+  audit_log_model_repository: репозиторий
+  audit_log_model_workflow_rule: правило
+  audit_log_model_workflow_transition: переход
+  audit_log_model_workflow_permission: право на поле
+  audit_log_model_query: запрос
+  audit_log_model_issue: задача
+  audit_log_model_attachment: файл
+  audit_log_model_wiki_page: вики-страница
+  audit_log_model_time_entry: трудозатраты
+  audit_log_model_journal: комментарий
+  audit_log_model_news: новость
+  audit_log_model_message: сообщение
+  audit_log_model_document: документ

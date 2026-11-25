@@ -1,25 +1,31 @@
 <% html_title l(:audit_log_title) %>
+<%= render partial: 'audit_log/styles' %>
 
-<h2><%= l(:audit_log_title) %></h2>
+<div class="al">
+  <div class="al-unlock">
+    <h2><%= l(:audit_log_title) %></h2>
+    <p class="al-lead"><%= l(:audit_log_unlock_info, minutes: RedmineAuditLog::Config.unlock_minutes) %></p>
 
-<% if @password_missing %>
-  <p class="warning"><%= l(:audit_log_error_password_not_set, path: RedmineAuditLog::Config.path) %></p>
-<% end %>
-<% if @locked_out %>
-  <p class="warning"><%= l(:audit_log_error_locked_out, minutes: (AuditLogController::FAILURE_WINDOW / 60).to_i) %></p>
-<% end %>
+    <% if @password_missing %>
+      <div class="al-problem" role="alert"><%= l(:audit_log_error_password_not_set, path: RedmineAuditLog::Config.path) %></div>
+    <% elsif @locked_out %>
+      <div class="al-problem" role="alert"><%= l(:audit_log_error_locked_out, minutes: (AuditLogController::FAILURE_WINDOW / 60).to_i) %></div>
+    <% elsif @problem %>
+      <div class="al-problem" role="alert"><%= @problem %> <%= al_count(:audit_log_attempts_left, @attempts_left) %></div>
+    <% end %>
 
-<%= form_tag(audit_log_unlock_path, method: :post, autocomplete: 'off') do %>
-  <div class="box tabular">
-    <p><%= l(:audit_log_unlock_info, minutes: RedmineAuditLog::Config.unlock_minutes) %></p>
-    <p>
-      <label for="own_password"><%= l(:audit_log_own_password, login: User.current.login) %></label>
-      <%= password_field_tag 'own_password', nil, size: 25, autocomplete: 'current-password', required: true %>
-    </p>
-    <p>
-      <label for="journal_password"><%= l(:audit_log_journal_password) %></label>
-      <%= password_field_tag 'journal_password', nil, size: 25, autocomplete: 'off', required: true %>
-    </p>
+    <%= form_tag(audit_log_unlock_path, method: :post, autocomplete: 'off') do %>
+      <div class="al-field">
+        <label for="own_password"><%= l(:audit_log_own_password_label) %> <small><%= User.current.login %></small></label>
+        <%= password_field_tag 'own_password', nil, autocomplete: 'current-password', required: true,
+                               autofocus: true, disabled: @password_missing || @locked_out %>
+      </div>
+      <div class="al-field">
+        <label for="journal_password"><%= l(:audit_log_journal_password) %></label>
+        <%= password_field_tag 'journal_password', nil, autocomplete: 'off', required: true,
+                               disabled: @password_missing || @locked_out %>
+      </div>
+      <button type="submit" class="al-btn al-submit" <%= 'disabled' if @password_missing || @locked_out %>><%= l(:audit_log_open) %></button>
+    <% end %>
   </div>
-  <%= submit_tag l(:audit_log_open) %>
-<% end %>
+</div>

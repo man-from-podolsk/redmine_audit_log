@@ -1,50 +1,202 @@
 en:
-  audit_log_title: "Audit log"
-  audit_log_unlock_info: "Enter your Redmine password and the journal password. The journal stays open for %{minutes} min. Every opening is logged."
-  audit_log_own_password: "Your password (%{login})"
-  audit_log_journal_password: "Journal password"
-  audit_log_open: "Open the journal"
-  audit_log_error_wrong_passwords: "Wrong password. The attempt has been logged."
-  audit_log_error_locked_out: "Too many failed attempts. Try again in %{minutes} min."
-  audit_log_error_password_not_set: "The journal password in %{path} is missing or damaged (for example the REPLACE placeholder). Generate the hash again: bin/audit_log_password."
-  audit_log_verify: "Check integrity"
-  audit_log_lock: "Close the journal"
-  audit_log_chain_ok: "The chain of entries is intact: %{count} checked."
-  audit_log_chain_broken: "The chain is broken at %{count} entries (changed, or neighbours deleted): %{ids}."
-  audit_log_warning_world_readable: "%{path} is readable by every user of the server. Run chown root:www-data and chmod 640."
-  audit_log_alerts_week: "Alerts in the last 7 days: %{count}"
-  audit_log_from: "From"
-  audit_log_to: "to"
-  audit_log_category: "Type"
-  audit_log_search: "Text"
-  audit_log_only_alerts: "alerts only"
-  audit_log_time: "Time"
-  audit_log_event: "Event"
-  audit_log_what: "What"
-  audit_log_alert: "ALERT"
-  audit_log_details: "parameters"
-  audit_log_footer: "Entries are kept %{days} days. Access: %{auditors}. The journal closes after %{minutes} min. Settings are in config/audit_log.yml on the server."
-
-  audit_log_category_auth: "Sign-in"
-  audit_log_category_change: "Change"
-  audit_log_category_access: "Journal"
-
-  audit_log_event_login_success: "signed in"
-  audit_log_event_login_failure: "sign-in failed"
-  audit_log_event_login_twofa_pending: "password accepted, waiting for 2FA code"
-  audit_log_event_login_twofa_failure: "wrong 2FA code"
-  audit_log_event_logout: "signed out"
-  audit_log_event_session_end: "session ended"
-  audit_log_event_request: "request"
-  audit_log_event_unlock: "opened"
-  audit_log_event_unlock_failed: "failed attempt to open"
-  audit_log_event_unlock_refused: "opening blocked"
-  audit_log_event_view: "viewed"
-  audit_log_event_export: "CSV export"
-  audit_log_event_verify: "integrity check"
-  audit_log_event_lock: "closed"
-  audit_log_event_denied: "attempt to open without access"
-
-  audit_log_change_create: "created"
-  audit_log_change_update: "changed"
-  audit_log_change_destroy: "deleted"
+  audit_log_title: Audit log
+  audit_log_unlock_info: Enter your password and the journal password. The journal stays open for %{minutes} min; every opening is logged.
+  audit_log_own_password_label: Your password
+  audit_log_journal_password: Journal password
+  audit_log_open: Open the journal
+  audit_log_error_wrong_passwords: The password did not match. The attempt has been logged.
+  audit_log_attempts_left:
+    zero: No attempts left, wait 15 minutes.
+    one: '%{count} attempt left in 15 minutes.'
+    other: '%{count} attempts left in 15 minutes.'
+  audit_log_error_locked_out: Too many wrong attempts. The journal can be opened again in %{minutes} min.
+  audit_log_error_password_not_set: 'The journal password in %{path} is missing or damaged (for example the REPLACE placeholder). Set it again: bin/audit_log_password.'
+  audit_log_status: 'Entries are kept %{days} days. Can open it: %{auditors}. Closes at %{time}.'
+  audit_log_never_verified: Integrity has not been checked yet.
+  audit_log_chain_ok_short: Chain intact
+  audit_log_chain_bad_short: Chain broken
+  audit_log_last_verify: last checked %{time}.
+  audit_log_verify: Check integrity
+  audit_log_export: Export CSV
+  audit_log_lock: Close the journal
+  audit_log_chain_ok: 'The chain of entries is intact: %{count} checked.'
+  audit_log_chain_broken: 'The chain is broken at %{count} entries (changed, or neighbours deleted): %{ids}.'
+  audit_log_warning_world_readable: '%{path} is readable by every user of the server. Run chown root:www-data and chmod 640.'
+  audit_log_alerts_week:
+    one: '%{count} alert in the last 7 days.'
+    other: '%{count} alerts in the last 7 days.'
+  audit_log_last_alert: 'Latest %{time}:'
+  audit_log_show_alerts: Show alerts
+  audit_log_category: Event type
+  audit_log_tab_all: All events
+  audit_log_tab_auth: Sign-ins
+  audit_log_tab_failed: Failed sign-ins
+  audit_log_tab_change: Changes
+  audit_log_tab_access: Journal
+  audit_log_tab_alerts: Alerts
+  audit_log_search_placeholder: Login, IP or text
+  audit_log_from: from
+  audit_log_to: to
+  audit_log_show: Show
+  audit_log_reset: Reset
+  audit_log_filter_by: Show only %{value}
+  audit_log_empty_none: No events yet. They appear after the first sign-in or change in Redmine.
+  audit_log_empty_filtered: No events match. Change the dates or the search text, or pick another tab.
+  audit_log_events:
+    one: '%{count} event'
+    other: '%{count} events'
+  audit_log_yesterday: yesterday
+  audit_log_shown: Showing %{from}–%{to} of %{total}
+  audit_log_alert: alert
+  audit_log_details: Details
+  audit_log_request: Request
+  audit_log_handler: Handler
+  audit_log_params: Parameters
+  audit_log_browser: Browser
+  audit_log_record: Entry
+  audit_log_anonymous: Anonymous
+  audit_log_did_login: signed in
+  audit_log_with_2fa: with a 2FA code
+  audit_log_did_login_failure: 'could not sign in: %{reason}'
+  audit_log_unknown_login: (no such login)
+  audit_log_reason_invalid: wrong login or password
+  audit_log_reason_locked: account locked
+  audit_log_reason_pending: account not activated
+  audit_log_reason_ldap_registration: the LDAP account needs registration
+  audit_log_did_twofa_pending: entered the right password, waiting for the 2FA code
+  audit_log_did_twofa_failure: entered a wrong 2FA code
+  audit_log_did_logout: signed out
+  audit_log_did_session_end: session ended
+  audit_log_did_unlock: opened the journal
+  audit_log_did_unlock_failed: 'could not open the journal: %{reason}'
+  audit_log_reason_journal_password: wrong journal password
+  audit_log_reason_own_password: wrong own password
+  audit_log_reason_both_passwords: both passwords wrong
+  audit_log_did_unlock_refused: 'could not open the journal: too many attempts'
+  audit_log_did_view: viewed the journal
+  audit_log_did_export: exported the journal to CSV
+  audit_log_filter_note: '(filter: %{filter})'
+  audit_log_did_verify_ok: 'checked integrity: no problems, %{count} checked'
+  audit_log_did_verify_broken: 'checked integrity: broken at %{count} entries'
+  audit_log_did_lock: closed the journal
+  audit_log_did_denied: tried to open the journal without access
+  audit_log_via_api: (via API)
+  audit_log_failed_status: (not done, response %{status})
+  audit_log_value_changed: changed
+  audit_log_value_empty: empty
+  audit_log_became: became
+  audit_log_attr_twofa: 2FA key
+  audit_log_local_login: local
+  audit_log_change_create: 'created:'
+  audit_log_change_update: 'changed:'
+  audit_log_change_destroy: 'deleted:'
+  audit_log_do_generic_create: created
+  audit_log_do_generic_update: changed
+  audit_log_do_generic_destroy: deleted
+  audit_log_do_settings: changed the settings
+  audit_log_do_plugin_settings: changed plugin settings
+  audit_log_do_user_create: created user
+  audit_log_do_user_update: changed user
+  audit_log_do_user_destroy: deleted user
+  audit_log_do_users_destroy: deleted users
+  audit_log_do_users_lock: locked users
+  audit_log_do_users_unlock: unlocked users
+  audit_log_do_group_create: created group
+  audit_log_do_group_update: changed group
+  audit_log_do_group_destroy: deleted group
+  audit_log_do_group_add_users: added users to group
+  audit_log_do_group_remove_user: removed a user from group
+  audit_log_do_role_create: created role
+  audit_log_do_role_update: changed role
+  audit_log_do_role_destroy: deleted role
+  audit_log_do_role_permissions: changed role permissions
+  audit_log_do_tracker_create: created tracker
+  audit_log_do_tracker_update: changed tracker
+  audit_log_do_tracker_destroy: deleted tracker
+  audit_log_do_status_create: created issue status
+  audit_log_do_status_update: changed issue status
+  audit_log_do_status_destroy: deleted issue status
+  audit_log_do_workflow: changed the workflow
+  audit_log_do_workflow_fields: changed field permissions
+  audit_log_do_workflow_copy: copied a workflow
+  audit_log_do_field_create: created custom field
+  audit_log_do_field_update: changed custom field
+  audit_log_do_field_destroy: deleted custom field
+  audit_log_do_ldap_create: added LDAP source
+  audit_log_do_ldap_update: changed LDAP source
+  audit_log_do_ldap_destroy: deleted LDAP source
+  audit_log_do_project_create: created project
+  audit_log_do_project_update: changed project
+  audit_log_do_project_destroy: deleted project
+  audit_log_do_project_archive: archived project
+  audit_log_do_project_unarchive: unarchived project
+  audit_log_do_project_close: closed project
+  audit_log_do_project_reopen: reopened project
+  audit_log_do_member_create: added project members
+  audit_log_do_member_update: changed member roles
+  audit_log_do_member_destroy: removed project member
+  audit_log_do_version_create: created version
+  audit_log_do_version_update: changed version
+  audit_log_do_version_destroy: deleted version
+  audit_log_do_category_create: created issue category
+  audit_log_do_category_update: changed issue category
+  audit_log_do_category_destroy: deleted issue category
+  audit_log_do_enum_create: created list value
+  audit_log_do_enum_update: changed list value
+  audit_log_do_enum_destroy: deleted list value
+  audit_log_do_repo_create: added repository
+  audit_log_do_repo_update: changed repository
+  audit_log_do_repo_destroy: deleted repository
+  audit_log_do_query_create: saved query
+  audit_log_do_query_update: changed query
+  audit_log_do_query_destroy: deleted query
+  audit_log_do_issue_destroy: deleted issue
+  audit_log_do_file_destroy: deleted file
+  audit_log_do_wiki_destroy: deleted wiki page
+  audit_log_do_time_destroy: deleted time entries
+  audit_log_do_news_destroy: deleted news
+  audit_log_do_message_destroy: deleted message
+  audit_log_do_document_destroy: deleted document
+  audit_log_do_journal_update: edited a comment
+  audit_log_do_lost_password: requested a password reset
+  audit_log_do_register: registered
+  audit_log_do_activate: activated the account
+  audit_log_do_my_account: changed own account
+  audit_log_do_my_password: changed own password
+  audit_log_do_my_api_key: reset own API key
+  audit_log_do_my_atom_key: reset own Atom key
+  audit_log_do_twofa_on: turned on 2FA
+  audit_log_do_twofa_off: turned off 2FA
+  audit_log_do_email_create: added e-mail address
+  audit_log_do_email_destroy: deleted e-mail address
+  audit_log_do_email_update: changed e-mail address
+  audit_log_model_user: user
+  audit_log_model_group: group
+  audit_log_model_setting: setting
+  audit_log_model_role: role
+  audit_log_model_member: member
+  audit_log_model_member_role: member role
+  audit_log_model_tracker: tracker
+  audit_log_model_issue_status: status
+  audit_log_model_custom_field: field
+  audit_log_model_auth_source: LDAP
+  audit_log_model_auth_source_ldap: LDAP
+  audit_log_model_project: project
+  audit_log_model_enabled_module: module
+  audit_log_model_version: version
+  audit_log_model_issue_category: category
+  audit_log_model_enumeration: list value
+  audit_log_model_email_address: e-mail address
+  audit_log_model_repository: repository
+  audit_log_model_workflow_rule: rule
+  audit_log_model_workflow_transition: transition
+  audit_log_model_workflow_permission: field permission
+  audit_log_model_query: query
+  audit_log_model_issue: issue
+  audit_log_model_attachment: file
+  audit_log_model_wiki_page: wiki page
+  audit_log_model_time_entry: time entry
+  audit_log_model_journal: comment
+  audit_log_model_news: news
+  audit_log_model_message: message
+  audit_log_model_document: document

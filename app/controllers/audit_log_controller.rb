@@ -12,21 +12,24 @@ class AuditLogController < ApplicationController
   before_action :require_auditor
   before_action :require_unlocked, except: [:unlock, :verify_unlock]
 
+  helper :audit_log
+  TYPES = %w[auth failed change access alerts].freeze
+
   # GET
   def unlock
     @locked_out = locked_out?
     @password_missing = !RedmineAuditLog::Config.password_set?
+    @problem = flash[:audit_log_problem].is_a?(Hash) ? flash[:audit_log_problem]['text'] : nil
+    @attempts_left = [MAX_FAILURES - recent_failures, 0].max
   end
 
   # POST
   def verify_unlock
     unless RedmineAuditLog::Config.password_set?
-      flash[:error] = l(:audit_log_error_password_not_set, path: RedmineAuditLog::Config.path)
       return redirect_to(audit_log_unlock_path)
     end
     if locked_out?
       access_log('unlock_refused', 'too many failed attempts', alert: true)
-      flash[:error] = l(:audit_log_error_locked_out, minutes: (FAILURE_WINDOW / 60).to_i)
       return redirect_to(audit_log_unlock_path)
     end
 
@@ -40,24 +43,33 @@ class AuditLogController < ApplicationController
     else
       failed = [('own password' unless own_ok), ('journal password' unless journal_ok)].compact.join(', ')
       access_log('unlock_failed', "wrong #{failed}", alert: true)
-      flash[:error] = l(:audit_log_error_wrong_passwords)
+      problem(l(:audit_log_error_wrong_passwords))
       redirect_to audit_log_unlock_path
     end
   rescue AuthSourceException => e
     access_log('unlock_failed', "LDAP error: #{e.message}", alert: true)
-    flash[:error] = e.message
+    problem(e.message)
     redirect_to audit_log_unlock_path
   end
 
   # GET
   def index
-    scope = filtered_scope
+    @type = TYPES.include?(params[:type]) ? params[:type] : legacy_type
+    base = filtered_scope
+    scope = by_type(base, @type)
     respond_to do |format|
       format.html do
         @entry_count = scope.count
         @entry_pages = Redmine::Pagination::Paginator.new(@entry_count, PER_PAGE, params['page'])
         @entries = scope.newest_first.limit(@entry_pages.per_page).offset(@entry_pages.offset).to_a
-        @alerts_week = AuditLogEntry.where(alert: true).where(AuditLogEntry.arel_table[:created_at].gt(7.days.ago)).count
+        @days = @entries.group_by { |e| User.current.time_to_date(e.created_at) }
+        @counts = { '' => base.count }
+        TYPES.each { |type| @counts[type] = by_type(base, type).count }
+        week = AuditLogEntry.where(alert: true).where(AuditLogEntry.arel_table[:created_at].gt(7.days.ago))
+        @alerts_week = week.count
+        @last_alert = week.newest_first.first
+        @last_verify = AuditLogEntry.where(category: 'access', event: 'verify').newest_first.first
+        @closes_at = Time.zone.at(session[SESSION_KEY]['until'].to_i)
         @config = RedmineAuditLog::Config
         access_log('view', filters_summary) if params['page'].blank?
       end
@@ -116,8 +128,7 @@ class AuditLogController < ApplicationController
   end
 
   def locked_out?
-    AuditLogEntry.where(category: 'access', event: 'unlock_failed', user_id: User.current.id)
-                 .where(AuditLogEntry.arel_table[:created_at].gt(FAILURE_WINDOW.ago)).count >= MAX_FAILURES
+    recent_failures >= MAX_FAILURES
   end
 
   def access_log(event, message, alert: false)
@@ -138,21 +149,49 @@ class AuditLogController < ApplicationController
     if (to = parse_date(params[:to]))
       scope = scope.where(table[:created_at].lteq(to.end_of_day))
     end
-    scope = scope.where(category: params[:category]) if AuditLogEntry::CATEGORIES.include?(params[:category])
-    scope = scope.where(alert: true) if params[:alerts] == '1'
     if params[:user].present?
       scope = scope.where(table[:user_login].matches("%#{AuditLogEntry.sanitize_sql_like(params[:user].strip)}%"))
     end
     scope = scope.where(ip: params[:ip].strip) if params[:ip].present?
     if params[:q].present?
       pattern = "%#{AuditLogEntry.sanitize_sql_like(params[:q].strip)}%"
-      scope = scope.where(table[:controller_action].matches(pattern)
+      scope = scope.where(table[:user_login].matches(pattern)
+                            .or(table[:ip].matches(pattern))
+                            .or(table[:controller_action].matches(pattern))
                             .or(table[:path].matches(pattern))
                             .or(table[:message].matches(pattern))
                             .or(table[:changes_json].matches(pattern))
                             .or(table[:params].matches(pattern)))
     end
     scope
+  end
+
+  def by_type(scope, type)
+    case type
+    when 'auth' then scope.where(category: 'auth')
+    when 'failed' then scope.where(event: %w[login_failure login_twofa_failure])
+    when 'change' then scope.where(category: 'change')
+    when 'access' then scope.where(category: 'access')
+    when 'alerts' then scope.where(alert: true)
+    else scope
+    end
+  end
+
+  # Links made before the redesign: ?category=auth, ?alerts=1
+  def legacy_type
+    return 'alerts' if params[:alerts] == '1'
+
+    AuditLogEntry::CATEGORIES.include?(params[:category]) ? params[:category] : ''
+  end
+
+  # Message shown inside the unlock form (a Hash, so the layout does not show it a second time)
+  def problem(text)
+    flash[:audit_log_problem] = { 'text' => text }
+  end
+
+  def recent_failures
+    AuditLogEntry.where(category: 'access', event: 'unlock_failed', user_id: User.current.id)
+                 .where(AuditLogEntry.arel_table[:created_at].gt(FAILURE_WINDOW.ago)).count
   end
 
   def parse_date(value)
@@ -162,7 +201,7 @@ class AuditLogController < ApplicationController
   end
 
   def filters_summary
-    params.to_unsafe_h.slice('from', 'to', 'category', 'alerts', 'user', 'ip', 'q').compact_blank
+    params.to_unsafe_h.slice('type', 'from', 'to', 'user', 'ip', 'q').compact_blank
           .map { |k, v| "#{k}=#{v}" }.join(' ').presence
   end
 

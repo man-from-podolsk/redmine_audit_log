@@ -1,130 +1,118 @@
 <% html_title l(:audit_log_title) %>
+<%= render partial: 'audit_log/styles' %>
 
-<div class="contextual">
-  <%= form_tag(audit_log_verify_path, method: :post, style: 'display: inline;') do %>
-    <%= submit_tag l(:audit_log_verify), class: 'button-small' %>
+<div class="al">
+  <div class="al-head">
+    <div>
+      <h2><%= l(:audit_log_title) %></h2>
+      <p class="al-status">
+        <%= l(:audit_log_status, days: @config.retention_days, auditors: @config.auditors.join(', '),
+              time: format_time(@closes_at, false)) %><br>
+        <% if @last_verify.nil? %>
+          <%= l(:audit_log_never_verified) %>
+        <% elsif @last_verify.alert %>
+          <span class="al-seal-bad"><%= l(:audit_log_chain_bad_short) %></span>,
+          <%= l(:audit_log_last_verify, time: format_time(@last_verify.created_at)) %>
+        <% else %>
+          <span class="al-seal-ok"><%= l(:audit_log_chain_ok_short) %></span>,
+          <%= l(:audit_log_last_verify, time: format_time(@last_verify.created_at)) %>
+        <% end %>
+      </p>
+    </div>
+    <div class="al-actions">
+      <%= form_tag(audit_log_verify_path, method: :post) do %>
+        <button type="submit" class="al-btn"><%= l(:audit_log_verify) %></button>
+      <% end %>
+      <%= link_to l(:audit_log_export), audit_log_csv_path(request.query_parameters.except('page')), class: 'al-btn' %>
+      <%= form_tag(audit_log_lock_path, method: :post) do %>
+        <button type="submit" class="al-btn al-btn-quiet"><%= l(:audit_log_lock) %></button>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @config.world_readable? %>
+    <div class="al-banner"><strong><%= l(:audit_log_warning_world_readable, path: @config.path) %></strong></div>
   <% end %>
-  <%= form_tag(audit_log_lock_path, method: :post, style: 'display: inline;') do %>
-    <%= submit_tag l(:audit_log_lock), class: 'button-small' %>
+
+  <% if @alerts_week.positive? && @type != 'alerts' %>
+    <div class="al-banner">
+      <strong><%= al_count(:audit_log_alerts_week, @alerts_week) %></strong>
+      <% if @last_alert %>
+        <span><%= l(:audit_log_last_alert, time: format_time(@last_alert.created_at)) %>
+          <%= @last_alert.user_login.presence || l(:audit_log_anonymous) %> <%= al_sentence(@last_alert) %></span>
+      <% end %>
+      <%= link_to l(:audit_log_show_alerts), audit_log_path(type: 'alerts', from: 7.days.ago.to_date) %>
+    </div>
+  <% end %>
+
+  <nav class="al-tabs" aria-label="<%= l(:audit_log_category) %>">
+    <%= al_tab(l(:audit_log_tab_all), '', @counts[''], @type) %>
+    <%= al_tab(l(:audit_log_tab_auth), 'auth', @counts['auth'], @type) %>
+    <%= al_tab(l(:audit_log_tab_failed), 'failed', @counts['failed'], @type) %>
+    <%= al_tab(l(:audit_log_tab_change), 'change', @counts['change'], @type) %>
+    <%= al_tab(l(:audit_log_tab_access), 'access', @counts['access'], @type) %>
+    <%= al_tab(l(:audit_log_tab_alerts), 'alerts', @counts['alerts'], @type) %>
+  </nav>
+
+  <%= form_tag(audit_log_path, method: :get, class: 'al-filters', role: 'search') do %>
+    <%= hidden_field_tag 'type', @type, id: nil if @type.present? %>
+    <%= search_field_tag 'q', params[:q], placeholder: l(:audit_log_search_placeholder), 'aria-label': l(:audit_log_search_placeholder) %>
+    <label><%= l(:audit_log_from) %> <%= date_field_tag 'from', params[:from] %></label>
+    <label><%= l(:audit_log_to) %> <%= date_field_tag 'to', params[:to] %></label>
+    <button type="submit" class="al-btn"><%= l(:audit_log_show) %></button>
+    <% if params[:q].present? || params[:from].present? || params[:to].present? || params[:user].present? || params[:ip].present? %>
+      <%= link_to l(:audit_log_reset), audit_log_path(@type.present? ? { type: @type } : {}), class: 'al-clear' %>
+    <% end %>
+  <% end %>
+
+  <% if @entries.empty? %>
+    <div class="al-empty"><%= l(@counts[''].zero? && params.slice(:q, :from, :to).values.all?(&:blank?) ? :audit_log_empty_none : :audit_log_empty_filtered) %></div>
+  <% else %>
+    <% @days.each do |date, entries| %>
+      <section class="al-day">
+        <h3><%= al_day_title(date) %> <small><%= al_count(:audit_log_events, entries.size) %></small></h3>
+        <ol class="al-list">
+          <% entries.each do |entry| %>
+            <li class="al-row <%= al_row_class(entry) %>" id="entry-<%= entry.id %>">
+              <div class="al-time"><time datetime="<%= entry.created_at.utc.iso8601 %>"><%= format_time(entry.created_at, false) %></time></div>
+              <div class="al-what">
+                <%= al_who(entry) %> <%= al_sentence(entry) %>
+                <% if entry.alert %><span class="al-tag"><%= l(:audit_log_alert) %></span><% end %>
+                <%= al_diff(entry) %>
+                <% if entry.http_method.present? || entry.params.present? %>
+                  <details class="al-more">
+                    <summary><%= l(:audit_log_details) %></summary>
+                    <dl>
+                      <% if entry.http_method.present? %>
+                        <dt><%= l(:audit_log_request) %></dt>
+                        <dd><code><%= entry.http_method %> <%= entry.path %><%= " → #{entry.status}" if entry.status %></code></dd>
+                      <% end %>
+                      <% if entry.controller_action.present? %>
+                        <dt><%= l(:audit_log_handler) %></dt><dd><code><%= entry.controller_action %></code></dd>
+                      <% end %>
+                      <% if entry.params.present? %>
+                        <dt><%= l(:audit_log_params) %></dt><dd><pre><%= entry.params %></pre></dd>
+                      <% end %>
+                      <% if entry.user_agent.present? %>
+                        <dt><%= l(:audit_log_browser) %></dt><dd><%= entry.user_agent %></dd>
+                      <% end %>
+                      <dt><%= l(:audit_log_record) %></dt><dd>#<%= entry.id %>, <code><%= entry.entry_hash.to_s[0, 16] %></code></dd>
+                    </dl>
+                  </details>
+                <% end %>
+              </div>
+              <div class="al-meta">
+                <% if entry.ip.present? %><%= al_filter_link(entry.ip, entry.ip) %><br><% end %>
+                <%= entry.category == 'auth' && entry.auth_method.present? ? entry.auth_method : al_browser(entry.user_agent) %>
+              </div>
+            </li>
+          <% end %>
+        </ol>
+      </section>
+    <% end %>
+    <div class="al-foot">
+      <span><%= l(:audit_log_shown, from: @entry_pages.offset + 1, to: @entry_pages.offset + @entries.size, total: @entry_count) %></span>
+      <span class="pagination"><%= pagination_links_full @entry_pages, @entry_count, per_page_links: false %></span>
+    </div>
   <% end %>
 </div>
-
-<h2><%= l(:audit_log_title) %></h2>
-
-<% if @config.world_readable? %>
-  <p class="warning"><%= l(:audit_log_warning_world_readable, path: @config.path) %></p>
-<% end %>
-<% if @alerts_week.positive? %>
-  <p class="warning"><%= link_to l(:audit_log_alerts_week, count: @alerts_week), audit_log_path(alerts: '1', from: 7.days.ago.to_date) %></p>
-<% end %>
-
-<style>
-  #audit-log td { vertical-align: top; }
-  #audit-log td.audit-time { white-space: nowrap; }
-  #audit-log tr.audit-alert td { background: #fff5f5; }
-  #audit-log tr.audit-alert td.audit-event { color: #c92a2a; font-weight: bold; }
-  #audit-log .audit-changes { margin: 0; padding-left: 1.2em; }
-  #audit-log .audit-changes li { margin: 0; }
-  #audit-log del { color: #c92a2a; }
-  #audit-log ins { color: #2b8a3e; text-decoration: none; }
-  #audit-log details summary { cursor: pointer; color: #868e96; }
-  #audit-log pre { white-space: pre-wrap; word-break: break-all; margin: 4px 0; font-size: 11px; }
-</style>
-
-<%= form_tag(audit_log_path, method: :get, id: 'query_form') do %>
-  <fieldset class="collapsible">
-    <legend><%= l(:label_filter_plural) %></legend>
-    <div>
-      <label><%= l(:audit_log_from) %> <%= date_field_tag 'from', params[:from], size: 10 %></label>
-      <label><%= l(:audit_log_to) %> <%= date_field_tag 'to', params[:to], size: 10 %></label>
-      <label><%= l(:audit_log_category) %>
-        <%= select_tag 'category', options_for_select([[l(:label_all), '']] +
-              AuditLogEntry::CATEGORIES.map { |c| [l("audit_log_category_#{c}"), c] }, params[:category]) %>
-      </label>
-      <label><%= l(:field_login) %> <%= text_field_tag 'user', params[:user], size: 12 %></label>
-      <label>IP <%= text_field_tag 'ip', params[:ip], size: 14 %></label>
-      <label><%= l(:audit_log_search) %> <%= text_field_tag 'q', params[:q], size: 18 %></label>
-      <label><%= check_box_tag 'alerts', '1', params[:alerts] == '1' %> <%= l(:audit_log_only_alerts) %></label>
-      <%= submit_tag l(:button_apply), name: nil, class: 'button-small' %>
-      <%= link_to l(:button_clear), audit_log_path, class: 'icon icon-reload' %>
-    </div>
-  </fieldset>
-<% end %>
-
-<% if @entries.empty? %>
-  <p class="nodata"><%= l(:label_no_data) %></p>
-<% else %>
-  <div class="autoscroll">
-    <table class="list" id="audit-log">
-      <thead>
-        <tr>
-          <th><%= l(:audit_log_time) %></th>
-          <th><%= l(:audit_log_event) %></th>
-          <th><%= l(:field_login) %></th>
-          <th>IP</th>
-          <th><%= l(:audit_log_what) %></th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @entries.each do |entry| %>
-          <tr class="<%= cycle('odd', 'even') %> <%= 'audit-alert' if entry.alert %>">
-            <td class="audit-time"><%= format_time(entry.created_at) %><br><small>#<%= entry.id %></small></td>
-            <td class="audit-event">
-              <%= l("audit_log_category_#{entry.category}", default: entry.category) %>:
-              <%= l("audit_log_event_#{entry.event}", default: entry.event) %>
-              <% if entry.alert %><br><%= l(:audit_log_alert) %><% end %>
-            </td>
-            <td>
-              <%= entry.user_login %>
-              <% if entry.auth_method.present? %><br><small><%= entry.auth_method %></small><% end %>
-            </td>
-            <td><%= entry.ip %></td>
-            <td>
-              <% if entry.controller_action.present? %>
-                <code><%= entry.controller_action %></code>
-                <% if entry.http_method.present? %><small><%= entry.http_method %> <%= entry.path %> → <%= entry.status %></small><% end %>
-              <% end %>
-              <% if entry.message.present? %><div><%= entry.message %></div><% end %>
-              <% changes = entry.changes_data %>
-              <% if changes.is_a?(Array) && changes.any? %>
-                <ul class="audit-changes">
-                  <% changes.each do |change| %>
-                    <li>
-                      <%= l("audit_log_change_#{change['event']}", default: change['event'].to_s) %>
-                      <strong><%= change['model'] %> #<%= change['id'] %></strong> <%= change['label'] %>
-                      <% if change['changes'].is_a?(Hash) && change['changes'].any? %>
-                        <ul>
-                          <% change['changes'].each do |attribute, (before, after)| %>
-                            <li><%= attribute %>: <del><%= before.to_s.truncate(200) %></del> → <ins><%= after.to_s.truncate(200) %></ins></li>
-                          <% end %>
-                        </ul>
-                      <% end %>
-                    </li>
-                  <% end %>
-                </ul>
-              <% end %>
-              <% if entry.params.present? || entry.user_agent.present? %>
-                <details>
-                  <summary><%= l(:audit_log_details) %></summary>
-                  <% if entry.params.present? %><pre><%= entry.params %></pre><% end %>
-                  <% if entry.user_agent.present? %><pre><%= entry.user_agent %></pre><% end %>
-                </details>
-              <% end %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
-  <span class="pagination"><%= pagination_links_full @entry_pages, @entry_count %></span>
-<% end %>
-
-<p class="other-formats">
-  <%= l(:label_export_to) %>
-  <%= link_to 'CSV', audit_log_csv_path(request.query_parameters.except('page')) %>
-</p>
-
-<p><small>
-  <%= l(:audit_log_footer, days: @config.retention_days, auditors: @config.auditors.join(', '),
-        minutes: @config.unlock_minutes) %>
-</small></p>
