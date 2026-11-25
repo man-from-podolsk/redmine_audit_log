@@ -15,10 +15,15 @@ class AuditLogController < ApplicationController
   # GET
   def unlock
     @locked_out = locked_out?
+    @password_missing = !RedmineAuditLog::Config.password_set?
   end
 
   # POST
   def verify_unlock
+    unless RedmineAuditLog::Config.password_set?
+      flash[:error] = l(:audit_log_error_password_not_set, path: RedmineAuditLog::Config.path)
+      return redirect_to(audit_log_unlock_path)
+    end
     if locked_out?
       access_log('unlock_refused', 'too many failed attempts', alert: true)
       flash[:error] = l(:audit_log_error_locked_out, minutes: (FAILURE_WINDOW / 60).to_i)
@@ -93,7 +98,7 @@ class AuditLogController < ApplicationController
 
   # Not an auditor (or no config) -> the page does not exist
   def require_auditor
-    return true if User.current.logged? && RedmineAuditLog::Config.ready? && RedmineAuditLog::Config.auditor?(User.current)
+    return true if User.current.logged? && RedmineAuditLog::Config.auditor?(User.current)
 
     access_log('denied', 'not an auditor', alert: true) if User.current.logged?
     render_404

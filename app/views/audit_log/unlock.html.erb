@@ -2,6 +2,9 @@
 
 <h2><%= l(:audit_log_title) %></h2>
 
+<% if @password_missing %>
+  <p class="warning"><%= l(:audit_log_error_password_not_set, path: RedmineAuditLog::Config.path) %></p>
+<% end %>
 <% if @locked_out %>
   <p class="warning"><%= l(:audit_log_error_locked_out, minutes: (AuditLogController::FAILURE_WINDOW / 60).to_i) %></p>
 <% end %>

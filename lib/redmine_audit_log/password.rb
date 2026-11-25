@@ -22,9 +22,14 @@ module RedmineAuditLog
       [PREFIX, iterations, Base64.strict_encode64(salt), Base64.strict_encode64(hash)].join('$')
     end
 
+    # A real hash: enough iterations, salt and hash that decode from base64 (not the REPLACE placeholder)
     def valid_digest?(digest)
       match = FORMAT.match(digest.to_s)
-      !match.nil? && match[1].to_i >= 100_000
+      return false unless match && match[1].to_i >= 100_000
+
+      Base64.strict_decode64(match[2]).bytesize >= 8 && Base64.strict_decode64(match[3]).bytesize >= 16
+    rescue ArgumentError
+      false
     end
 
     def verify(clear, digest)

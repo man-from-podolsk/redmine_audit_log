@@ -6,6 +6,7 @@ ru:
   audit_log_open: "Открыть журнал"
   audit_log_error_wrong_passwords: "Неверный пароль. Попытка записана в журнал."
   audit_log_error_locked_out: "Слишком много неверных попыток. Попробуйте через %{minutes} мин."
+  audit_log_error_password_not_set: "Пароль журнала в %{path} не задан или повреждён (например, остался пример REPLACE). Сгенерируйте хеш заново: bin/audit_log_password."
   audit_log_verify: "Проверить целостность"
   audit_log_lock: "Закрыть журнал"
   audit_log_chain_ok: "Цепочка записей цела: проверено %{count}."

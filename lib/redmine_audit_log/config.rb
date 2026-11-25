@@ -75,7 +75,11 @@ module RedmineAuditLog
     end
 
     def ready?
-      auditors.any? && Password.valid_digest?(password_digest)
+      auditors.any? && password_set?
+    end
+
+    def password_set?
+      Password.valid_digest?(password_digest)
     end
 
     def retention_days
