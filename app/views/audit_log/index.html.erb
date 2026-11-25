@@ -34,6 +34,10 @@
     <div class="al-banner"><strong><%= l(:audit_log_warning_world_readable, path: @config.path) %></strong></div>
   <% end %>
 
+  <% if @update %>
+    <div class="al-banner al-banner-info"><div><%= RedmineAuditLog::UpdateCheck.render_notice(self, @update, 'audit_log') %></div></div>
+  <% end %>
+
   <% if @alerts_week.positive? && @type != 'alerts' %>
     <div class="al-banner">
       <strong><%= al_count(:audit_log_alerts_week, @alerts_week) %></strong>

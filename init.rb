@@ -9,8 +9,9 @@
 Redmine::Plugin.register :redmine_audit_log do
   name 'Audit Log'
   author 'man-from-podolsk'
-  description 'Sign-in and administrative change journal, hidden from Redmine administrators.'
-  version '1.0.0'
+  author_url 'https://github.com/man-from-podolsk'
+  description 'Sign-in and change journal.'
+  version '1.1.0'
   url 'https://github.com/man-from-podolsk/redmine_audit_log'
   requires_redmine version_or_higher: '6.0.0'
 end

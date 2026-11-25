@@ -200,3 +200,12 @@ en:
   audit_log_model_news: news
   audit_log_model_message: message
   audit_log_model_document: document
+  audit_log_update_title: 'An update is available for «%{name}»: %{installed} → %{latest}.'
+  audit_log_update_title_git: «%{name}» has %{count} new changes on GitHub.
+  audit_log_update_how_git: 'To update:'
+  audit_log_update_how_copy_1: 'To update: download the'
+  audit_log_update_archive: archive from GitHub
+  audit_log_update_how_copy_2: and replace the plugins/%{folder} folder with its contents (rename the old folder instead of deleting it).
+  audit_log_update_restart: Then restart Redmine.
+  audit_log_update_migrate: 'This version changes the database; after replacing, run:'
+  audit_log_update_all_changes: All changes

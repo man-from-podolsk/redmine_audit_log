@@ -206,3 +206,12 @@ ru:
   audit_log_model_news: новость
   audit_log_model_message: сообщение
   audit_log_model_document: документ
+  audit_log_update_title: 'Для модуля «%{name}» есть обновление: %{installed} → %{latest}.'
+  audit_log_update_title_git: 'Для модуля «%{name}» на GitHub новых изменений: %{count}.'
+  audit_log_update_how_git: 'Обновить:'
+  audit_log_update_how_copy_1: 'Обновить: скачайте'
+  audit_log_update_archive: архив с GitHub
+  audit_log_update_how_copy_2: и замените его содержимым папку plugins/%{folder} (старую папку лучше переименовать, а не удалять).
+  audit_log_update_restart: Затем перезапустите Redmine.
+  audit_log_update_migrate: 'В новой версии меняется база данных, после замены выполните:'
+  audit_log_update_all_changes: Все изменения

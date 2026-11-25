@@ -71,6 +71,8 @@ class AuditLogController < ApplicationController
         @last_verify = AuditLogEntry.where(category: 'access', event: 'verify').newest_first.first
         @closes_at = Time.zone.at(session[SESSION_KEY]['until'].to_i)
         @config = RedmineAuditLog::Config
+        update = RedmineAuditLog::UpdateCheck.status
+        @update = update if RedmineAuditLog::UpdateCheck.update_available?(update)
         # Opening the journal is logged once (unlock); browsing and reloading are not
       end
       format.csv do

@@ -123,3 +123,22 @@ sudo -u www-data env PATH="$RUBY_BIN:$PATH" RAILS_ENV=production bundle exec rak
     (`UPDATE audit_log_entries SET message='x' WHERE id=...`): проверка показывает эту запись.
 11. Выгрузить CSV: в журнале запись «выгрузка CSV».
 12. `chmod 644 config/audit_log.yml`: в журнале предупреждение о правах. Вернуть `640`.
+
+## Обновление
+
+Раз в сутки модуль сверяет свою версию с GitHub и, если есть новая, показывает уведомление внутри журнала (видят только аудиторы): что изменилось
+(из `CHANGELOG.md`) и как обновить. Запрос идёт с сервера Redmine на `api.github.com` и `raw.githubusercontent.com`
+в фоне и не замедляет страницы. Проверить сразу: `bundle exec rake redmine:audit_log:check_update RAILS_ENV=production`.
+
+Если модуль установлен копированием:
+
+1. Скачайте архив https://github.com/man-from-podolsk/redmine_audit_log/archive/refs/heads/main.zip.
+2. Переименуйте старую папку: `mv plugins/redmine_audit_log /root/redmine_audit_log.old`.
+3. Распакуйте архив в `plugins/redmine_audit_log` (папка в архиве называется `redmine_audit_log-main`, её нужно переименовать),
+   `chown -R www-data:www-data plugins/redmine_audit_log`.
+4. Если в `CHANGELOG.md` для новой версии сказано «миграция», выполните
+   `bundle exec rake redmine:plugins:migrate NAME=redmine_audit_log RAILS_ENV=production`.
+5. Перезапустите Redmine.
+
+Если установлен через `git clone`: `cd plugins/redmine_audit_log && git pull` и перезапуск. Уведомление в этом случае
+считает новые коммиты, а не версии.
