@@ -1,0 +1,22 @@
+<% html_title l(:audit_log_title) %>
+
+<h2><%= l(:audit_log_title) %></h2>
+
+<% if @locked_out %>
+  <p class="warning"><%= l(:audit_log_error_locked_out, minutes: (AuditLogController::FAILURE_WINDOW / 60).to_i) %></p>
+<% end %>
+
+<%= form_tag(audit_log_unlock_path, method: :post, autocomplete: 'off') do %>
+  <div class="box tabular">
+    <p><%= l(:audit_log_unlock_info, minutes: RedmineAuditLog::Config.unlock_minutes) %></p>
+    <p>
+      <label for="own_password"><%= l(:audit_log_own_password, login: User.current.login) %></label>
+      <%= password_field_tag 'own_password', nil, size: 25, autocomplete: 'current-password', required: true %>
+    </p>
+    <p>
+      <label for="journal_password"><%= l(:audit_log_journal_password) %></label>
+      <%= password_field_tag 'journal_password', nil, size: 25, autocomplete: 'off', required: true %>
+    </p>
+  </div>
+  <%= submit_tag l(:audit_log_open) %>
+<% end %>

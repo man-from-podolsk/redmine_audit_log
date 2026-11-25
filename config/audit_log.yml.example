@@ -1,0 +1,25 @@
+# Copy to /opt/redmine/config/audit_log.yml (the Redmine config folder, not the plugin folder):
+#   cp plugins/redmine_audit_log/config/audit_log.yml.example config/audit_log.yml
+#   chown root:www-data config/audit_log.yml && chmod 640 config/audit_log.yml
+#
+# Changes are picked up without a restart, except mount_path.
+
+# Redmine logins that may open the journal
+auditors:
+  - ivanov
+
+# Hash of the journal password: ruby plugins/redmine_audit_log/bin/audit_log_password
+password: "pbkdf2_sha256$600000$REPLACE$REPLACE"
+
+# Address of the journal: https://<redmine>/<mount_path>  (needs a restart of Redmine to change)
+# Choose something not obvious; the real protection is the list and the passwords above.
+mount_path: "audit-log"
+
+# Entries older than this are deleted
+retention_days: 365
+
+# Also log changes that are already visible in Activity (issues, comments, wiki, time entries...)
+log_routine: false
+
+# The journal closes after this many minutes
+unlock_minutes: 15
