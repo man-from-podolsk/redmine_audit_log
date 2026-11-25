@@ -71,7 +71,7 @@ class AuditLogController < ApplicationController
         @last_verify = AuditLogEntry.where(category: 'access', event: 'verify').newest_first.first
         @closes_at = Time.zone.at(session[SESSION_KEY]['until'].to_i)
         @config = RedmineAuditLog::Config
-        access_log('view', filters_summary) if params['page'].blank?
+        # Opening the journal is logged once (unlock); browsing and reloading are not
       end
       format.csv do
         access_log('export', filters_summary)

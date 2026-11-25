@@ -9,7 +9,6 @@
     --al-change: #1c7ed6;
     --al-access: #7048e8;
     --al-alert: #e03131;
-    max-inline-size: 72rem;
     font-variant-numeric: tabular-nums;
   }
   .al a { text-decoration: none; }
@@ -50,6 +49,11 @@
   .al .al-tab:hover { text-decoration: none; color: inherit; }
   .al-tab[aria-current="true"] { border-block-end-color: currentColor; color: inherit; }
   .al-tab-alert b { color: var(--al-alert); }
+  #content .al a.al-tab, .al a.al-tab { color: var(--al-muted); }
+  #content .al a.al-tab b, .al a.al-tab b { color: inherit; }
+  #content .al a.al-tab[aria-current="true"], .al a.al-tab[aria-current="true"] { color: inherit; }
+  #content .al a.al-tab.al-tab-alert b, .al a.al-tab.al-tab-alert b { color: var(--al-alert); }
+  #content .al a.al-btn, .al a.al-btn { color: inherit; }
 
   /* Search row */
   .al-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 14px 0 6px; }
